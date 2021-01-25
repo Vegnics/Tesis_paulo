@@ -30,6 +30,7 @@ def homomorph_filter_N1(src,sigma):
     Ln_I = np.log(src + 1)
     I_fft = fft2(Ln_I)
     I_fft = fftshift(I_fft)
+    #print(I_fft.shape[0],I_fft.shape[1])
     kernel = highpass_gaussian_kernel(I_fft.shape[0], I_fft.shape[1], sigma)
     I_filt_fft = I_fft * kernel
     I_filt_fft_uns = ifftshift(I_filt_fft)
@@ -38,12 +39,15 @@ def homomorph_filter_N1(src,sigma):
     return I_filtered,np.min(I_filtered),np.max(I_filtered)
 
 def homomorph_filter_N3(src,sigma):
-    B, G, R = cv2.split(img_orig)
+    B, G, R = cv2.split(src)
     nB,minB,maxB = homomorph_filter_N1(B, sigma)
     nG,minG,maxG = homomorph_filter_N1(G, sigma)
     nR,minR,maxR = homomorph_filter_N1(R, sigma)
     max=np.max([maxB,maxG,maxR])
     min=np.min([minB,minG,minR])
+    #nB=remap(nB,minB,maxB)
+    #nG = remap(nG, minG, maxB)
+    #nR = remap(nR, minR, maxR)
     nB=remap(nB,min,max)
     nG = remap(nG, min, max)
     nR = remap(nR, min, max)
@@ -51,7 +55,7 @@ def homomorph_filter_N3(src,sigma):
 
 
 
-img_orig=cv2.imread("img_lighting.jpg",1)
+img_orig=cv2.imread("img_shadow1.jpg",1)
 img_orig=cv2.resize(img_orig,(-1,-1),fx=1/4,fy=1/4,interpolation=cv2.INTER_LINEAR)
 #kernel = Create_gaussian_kernel(img_orig.shape[0],img_orig.shape[1],10)
 #print(kernel)
@@ -75,8 +79,7 @@ I_filtered = np.exp(I_filtered)
 I_filtered = remap(I_filtered)
 print(I_filtered)
 """
-
-I_filtered = homomorph_filter_N3(img_orig,1.1)
+I_filtered = homomorph_filter_N3(img_orig,2)
 cv2.imshow("filtered",I_filtered)
 cv2.imshow("original",img_orig)
 cv2.waitKey(0)
